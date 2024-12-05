@@ -1,4 +1,5 @@
 import{Page} from '@playwright/test';
+import path from 'path';
 
 export default class BasePage {
 
@@ -91,6 +92,74 @@ export default class BasePage {
 
     protected async selectToDropDown(locator: string, option: string){
         await this.page.locator(locator).selectOption({label: option}); //select by text only, if want to select by option shoul remove lable
+    }
+
+    protected async getInputValue(locator: string){
+        return this.page.locator(locator).inputValue;
+    }
+
+    protected async getAttributeValueOfElement(locator: string, attributeName: string){
+        return this.page.locator(locator).getAttribute(attributeName);
+    }
+
+    protected async reloadPage(){
+        this.page.reload();
+    }
+
+    protected async getNumberOfElements(locator: string){
+        const element = await this.page.$$(locator);    //$$ get all element with the same locator
+        //const element = await this.page.locator(locator).all() - another option to get all elements with the same locator
+        return element.length;
+    }
+
+    protected async blurElement(locator: string){
+        this.page.locator(locator).blur();
+    }
+
+    protected async uploadFile(locator: string, fileName: string){
+        const pathToFile = path.resolve(__dirname, fileName);
+        await this.page.locator(locator).setInputFiles(pathToFile);
+    }
+
+    protected async uploadMultipleFiles(locator: string, ...fileName: string[]){
+        let filePaths: string[] = fileName.map(fileName => path.resolve(__dirname, fileName)); //map tung phan tu trong mang
+        await this.page.locator(locator).setInputFiles(filePaths);
+    }
+
+    protected async scrollToPageTop(){
+        await this.page.evaluate(() => window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'  //smooth scroll tu tu, instance load den luon 
+        }))
+    }
+
+    protected async hideElement(locator: string){
+        await this.page.locator(locator).evaluate(el => el.style.display = 'none !important'); //none vs invisibility la khac nhau
+    }
+
+    protected async redirectBack(){
+        await this.page.goBack();
+    }
+
+    protected async redirectForward(){
+        await this.page.goForward();
+    }
+
+    protected async getPageSource(){
+        return this.page.content();
+    }
+
+    protected async clickToElementInFrame(frameLocator: string, locator: string){
+        const frameElement = await this.page.frameLocator(frameLocator);
+        await frameElement.locator(locator).click();
+
+    }
+
+    protected async FillToElementInFrame(frameLocator: string, locator: string, inputValue: string){
+        const frameElement = await this.page.frameLocator(frameLocator);
+        await frameElement.locator(locator).fill(inputValue);
+
     }
 
 }
