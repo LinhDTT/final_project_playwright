@@ -23,6 +23,7 @@ export default class BasePage {
     protected async highlightElement(locator: string){
         let originalStyle: string;
         const element = this.page.locator(locator);
+        await element.evaluate(el => originalStyle = el.style.border);
         await element.evaluate(el => el.style.border); //get original style of the element
         await element.evaluate(el => el.style.border = '2px dashed red'); 
         await this.page.waitForTimeout(500);
@@ -195,7 +196,7 @@ export default class BasePage {
         return textOfElements;
     }
 
-    protected async waitForPageLoad(maxRetries: number) {
+    protected async waitForPageLoad(maxRetries: number = 3) {
         try {
             await this.page.waitForSelector('html', { state: 'attached' });
             await this.page.waitForLoadState('domcontentloaded');
